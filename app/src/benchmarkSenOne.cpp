@@ -39,13 +39,13 @@ void BenchMarkSenOne::WriteSingleData()
     //first write record than meta data
     std::string insert = "INSERT INTO RECORD"
                         "(datapoint_key, timestamp, value)"
-                        "VALUES (1,1697702445,19);";
+                        "VALUES (1,100000000,20);";
 
     handle.ExecuteSql(insert);
 
     insert = "INSERT INTO METADATA"
             "(datapoint_key, datapoint_name, sw_id, ecu_uuid, ts)"
-            "VALUES (1, 'flow_temp_circult_1', 10, 100, 1697702445);";
+            "VALUES (1, 'flow_temp_circult_1', 10, 100, 100000000);";
 
     handle.ExecuteSql(insert);
 
@@ -59,7 +59,7 @@ void BenchMarkSenOne::WriteBulkData()
 
     // write record
     int datapoint_key = 1;
-    int timestamp = 1697785707;
+    int timestamp = time(nullptr);
     int data = 10;
 
     for(int i = 0; i < 10; i++){
@@ -87,7 +87,7 @@ void BenchMarkSenOne::WriteBulkData()
     int swid = 10;
     int uuid = 1000;
     datapoint_key = 2;
-    timestamp = 1697785708;
+    timestamp++;
     std::string dataPointName = "flow_temp_circult_";
     for(int i = 0; i < 10; i++){
         swid += datapoint_key;
@@ -106,9 +106,9 @@ void BenchMarkSenOne::WriteBulkData()
 
 void BenchMarkSenOne::QueryWithTime(){}
 
-void BenchMarkSenOne::QueryDataWithinTime()
+void BenchMarkSenOne::QueryDataWithinTime(int from, int to)
 {
-    std::string select = "SELECT * FROM RECORD;";
+    std::string select = (boost::format("SELECT * FROM RECORD WHERE myNumber >= %1% AND myNumber <= %2%;") %(std::to_string(from)) %std::to_string(to)).str();
 
     auto callback = [](void* data, int argc, char** argv, char** colName) -> int {
             for (int i = 0; i < argc; ++i) {

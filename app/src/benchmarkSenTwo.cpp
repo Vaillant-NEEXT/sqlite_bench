@@ -30,7 +30,7 @@ void BenchMarkSenTwo::WriteSingleData()
     handle.ExecuteSql(sql);
     std::string insert = "INSERT INTO " + tableName + 
                         "(timestamp, value)"
-                        "VALUES (1697702445,19);";
+                        "VALUES (100000000,20);";
 
     handle.ExecuteSql(insert);
 
@@ -105,6 +105,9 @@ void BenchMarkSenTwo::WriteBulkData()
 
 void BenchMarkSenTwo::QueryWithTime(){}
 
-void BenchMarkSenTwo::QueryDataWithinTime(){}
+void BenchMarkSenTwo::QueryDataWithinTime(int from, int to)
+{
+
+}
 
 void BenchMarkSenTwo::DeletDataOlderThan(){}

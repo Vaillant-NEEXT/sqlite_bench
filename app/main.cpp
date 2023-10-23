@@ -2,26 +2,75 @@
 #include "benchmarkSenOne.hpp"
 #include "benchmarkSenTwo.hpp"
 #include <boost/format.hpp>
+#include <boost/program_options.hpp>
 #include <iostream> 
 #include <chrono>
 #include <ctime> 
 #include <thread>
 
 
-
+namespace po = boost::program_options;
 void CalculateTime();
+
+po::variables_map parse_args(int argc, char **argv) {
+    po::options_description desc("Allowed options");
+
+    desc.add_options()
+                    ("help, h", "produce help message")
+                    ("path,p", "path of db file")
+                    ("query,q", "do query")
+                    ("query_from,qf", "select data during time upper bound")
+                    ("query_to,qt", "select data during time lower bound");
+
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+
+    // handle help
+    if (vm.count("help")) {
+        // print help and exit
+        std::cout << desc << std::endl;
+        exit(0);
+    }
+
+    po::notify(vm);
+    return vm;
+}
 
 int main(int argc, char **argv) {
 try
 {
+    auto vm = parse_args(argc, argv);
+
+    if (vm.count("path"))
+    {
+        std::cout << "no path defined" << std::endl;
+        return 0;
+    }
+
+    std::string dbPath = vm["path"].as<std::string>();
     std::cout << "begin bench 1" << std::endl;
-    const std::string senonePath = "/home/sspa/Desktop/dev/sqlite_bench/db/sehmafirst.db";
+    const std::string senonePath = dbPath + "/sehmafirst.db";
     BenchMarkSenOne benchOne(senonePath);
 
     benchOne.CreateTable();
     benchOne.WriteSingleData();
     benchOne.WriteBulkData();
-    benchOne.QueryDataWithinTime();
+
+    if (vm.count("query")) 
+    {
+        int queryfrom = 0;
+        int queryto = 0;
+        if (vm.count("query_from") && vm.count("query_to")) 
+        {
+            queryfrom = vm["query_from"].as<int>();
+            queryto = vm["query_to"].as<int>();
+
+            std::cout << "query from " << queryfrom << std::endl;
+            std::cout << "query to " << queryto << std::endl;
+        }
+
+        benchOne.QueryDataWithinTime(queryfrom,queryto);
+    }
 
     std::cout << "end bench 1" << std::endl;
 

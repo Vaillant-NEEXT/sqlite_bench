@@ -29,7 +29,7 @@ class BenchMark{
 
         virtual void QueryWithTime()= 0;
 
-        virtual void QueryDataWithinTime()= 0;
+        virtual void QueryDataWithinTime(int from, int to)= 0;
 
         virtual void DeletDataOlderThan()= 0;
 

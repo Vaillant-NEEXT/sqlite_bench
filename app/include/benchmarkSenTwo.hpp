@@ -13,7 +13,7 @@ class BenchMarkSenTwo : public BenchMark{
 
         void QueryWithTime();
 
-        void QueryDataWithinTime();
+        void QueryDataWithinTime(int from, int to);
 
         void DeletDataOlderThan();
 };
