@@ -34,24 +34,54 @@ void BenchMarkSenOne::CreateTable()
     handle.ExecuteSql(sql);
 }
 
-void BenchMarkSenOne::WriteSingleData()
+void BenchMarkSenOne::WriteSingleData(int dataPointNum, int timeStampNum)
 {
     //first write record than meta data
-    std::string insert = "INSERT INTO RECORD"
-                        "(datapoint_key, timestamp, value)"
-                        "VALUES (1,100000000,20);";
+    const std::string insertRecordPattern = "INSERT INTO RECORD"
+                                            "(datapoint_key, timestamp, value)"
+                                            "VALUES (%1% ,%2% ,%3%);";
 
-    handle.ExecuteSql(insert);
+    const std::string insertMetaPattern = "INSERT INTO METADATA"
+                                        "(datapoint_key, datapoint_name, sw_id, ecu_uuid, ts)"
+                                        "VALUES (%1% ,%2% ,%3% ,%4% ,%5%);";
 
-    insert = "INSERT INTO METADATA"
-            "(datapoint_key, datapoint_name, sw_id, ecu_uuid, ts)"
-            "VALUES (1, 'flow_temp_circult_1', 10, 100, 100000000);";
 
-    handle.ExecuteSql(insert);
+    std::string insert = "";
+
+    // just some raw value
+    int datapoint_key = 1;
+    int timestamp = 100000000; 
+    int value = 20;
+    int sw_id = 10;
+    int ecu_uuid = 100;
+    std::string datapoint_name = "flow_temp_circult_";
+
+    for(int i = 0; i < dataPointNum; i++)
+    {
+        int cur = timestamp;
+        for(int j = 0; j < timeStampNum; j++)
+        {
+            insert = (boost::format(insertRecordPattern) % datapoint_key % cur % value).str();
+
+            handle.ExecuteSql(insert);
+            cur++;
+        }
+
+
+        insert = (boost::format(insertMetaPattern) % datapoint_key %(datapoint_name + std::to_string(datapoint_key)) 
+                                                    %sw_id  %ecu_uuid % timestamp).str();
+
+        handle.ExecuteSql(insert);
+
+        datapoint_key++;
+        timestamp++;
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
 
 }
 
-void BenchMarkSenOne::WriteBulkData()
+void BenchMarkSenOne::WriteBulkData(int dataPointNum, int timeStampNumc)
 {
     std::string bulk = "INSERT INTO RECORD "
                         "(datapoint_key, timestamp, value) "
@@ -62,9 +92,9 @@ void BenchMarkSenOne::WriteBulkData()
     int timestamp = time(nullptr);
     int data = 10;
 
-    for(int i = 0; i < 10; i++){
+    for(int i = 0; i < dataPointNum; i++){
         int cur = timestamp;
-        for(int j = 0; j < 100; j++){
+        for(int j = 0; j < timeStampNumc; j++){
             cur++;
             data++;
             bulk += " (" + std::to_string(datapoint_key) + "," + std::to_string(cur) + "," + std::to_string(data) + "),";
@@ -89,7 +119,7 @@ void BenchMarkSenOne::WriteBulkData()
     datapoint_key = 2;
     timestamp++;
     std::string dataPointName = "flow_temp_circult_";
-    for(int i = 0; i < 10; i++){
+    for(int i = 0; i < dataPointNum; i++){
         swid += datapoint_key;
         uuid += datapoint_key;
         bulk += " (" + std::to_string(datapoint_key) + "," + "'" + dataPointName + std::to_string(datapoint_key) + "'" + "," + std::to_string(swid) + 
@@ -121,4 +151,4 @@ void BenchMarkSenOne::QueryDataWithinTime(int from, int to)
     handle.ExecuteSql(select, callback);
 }
 
-void BenchMarkSenOne::DeletDataOlderThan(){}
+void BenchMarkSenOne::DeletDataOlderThan(int time){}

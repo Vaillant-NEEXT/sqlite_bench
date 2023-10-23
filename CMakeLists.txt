@@ -28,7 +28,7 @@ message("CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 
 find_package(Threads REQUIRED)
 
-find_package(Boost 1.54.0 REQUIRED COMPONENTS program_options)
+find_package(Boost 1.54.0 REQUIRED COMPONENTS)
 add_compile_definitions(BOOST_BIND_GLOBAL_PLACEHOLDERS)
 
 find_package(SQLite3 REQUIRED)

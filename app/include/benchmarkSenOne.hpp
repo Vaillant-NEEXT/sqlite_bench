@@ -7,13 +7,13 @@ class BenchMarkSenOne : public BenchMark{
 
         void CreateTable();
 
-        void WriteSingleData();
+        void WriteSingleData(int dataPointNum, int timeStampNum);
 
-        void WriteBulkData();
+        void WriteBulkData(int dataPointNum, int timeStampNum);
 
         void QueryWithTime();
 
         void QueryDataWithinTime(int from, int to);
 
-        void DeletDataOlderThan();
+        void DeletDataOlderThan(int time);
 };

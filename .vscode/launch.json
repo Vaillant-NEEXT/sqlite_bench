@@ -9,7 +9,6 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/app/app",
-            //"args": ["/home/sspan/dev/temp/sqlite_bench/db"],
             "args": [
                 "-p",
                 "/home/sspan/dev/temp/sqlite_bench/db",

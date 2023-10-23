@@ -23,15 +23,15 @@ class BenchMark{
 
         virtual void CreateTable() = 0;
 
-        virtual void WriteSingleData()= 0;
+        virtual void WriteSingleData(int dataPointNum, int timeStampNum)= 0;
 
-        virtual void WriteBulkData()= 0;
+        virtual void WriteBulkData(int dataPointNum, int timeStampNum)= 0;
 
         virtual void QueryWithTime()= 0;
 
         virtual void QueryDataWithinTime(int from, int to)= 0;
 
-        virtual void DeletDataOlderThan()= 0;
+        virtual void DeletDataOlderThan(int time)= 0;
 
     protected:
         DataRecorder::Data::DataBank handle;
