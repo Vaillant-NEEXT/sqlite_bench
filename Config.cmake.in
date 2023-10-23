@@ -1,0 +1,8 @@
+@PACKAGE_INIT@
+
+set(bsw-persistency_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+set(bsw-persistency_LIBRARIES bsw-persistency)
+
+include("${CMAKE_CURRENT_LIST_DIR}/neext-bsw-persistency-targets.cmake")
+
+check_required_components(bsw-persistency)

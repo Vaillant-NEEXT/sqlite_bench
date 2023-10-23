@@ -1,0 +1,9 @@
+
+#ifndef CCU_VERSION_TEMPLATE_H_
+#define CCU_VERSION_TEMPLATE_H_
+
+#include <string_view>
+
+inline constexpr std::string_view kVersionString = "${VERSION}";
+
+#endif  // CCU_VERSION_TEMPLATE_H_

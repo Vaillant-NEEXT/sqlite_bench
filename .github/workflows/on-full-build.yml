@@ -1,0 +1,8 @@
+name: Full build
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
