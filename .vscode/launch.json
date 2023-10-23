@@ -9,7 +9,17 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/app/app",
-            "args": [],
+            //"args": ["/home/sspan/dev/temp/sqlite_bench/db"],
+            "args": [
+                "-p",
+                "/home/sspan/dev/temp/sqlite_bench/db",
+                "-q",
+                "1",
+                "-f",
+                "1698050051",
+                "-t",
+                "1700000000"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

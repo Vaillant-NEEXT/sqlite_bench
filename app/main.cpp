@@ -17,10 +17,10 @@ po::variables_map parse_args(int argc, char **argv) {
 
     desc.add_options()
                     ("help, h", "produce help message")
-                    ("path,p", "path of db file")
-                    ("query,q", "do query")
-                    ("query_from,qf", "select data during time upper bound")
-                    ("query_to,qt", "select data during time lower bound");
+                    ("path,p", po::value<std::string>(),"path of db file")
+                    ("query,q", po::value<uint32_t>(), "do query")
+                    ("query_from,f", po::value<int>(), "select data during time upper bound")
+                    ("query_to,t", po::value<int>(), "select data during time lower bound");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -41,7 +41,7 @@ try
 {
     auto vm = parse_args(argc, argv);
 
-    if (vm.count("path"))
+    if (!vm.count("path"))
     {
         std::cout << "no path defined" << std::endl;
         return 0;
@@ -55,6 +55,8 @@ try
     benchOne.CreateTable();
     benchOne.WriteSingleData();
     benchOne.WriteBulkData();
+
+    std::this_thread::sleep_for(std::chrono::seconds(3));
 
     if (vm.count("query")) 
     {
@@ -76,7 +78,7 @@ try
 
 
     std::cout << "begin bench 2" << std::endl;
-    const std::string sentwoPath = "/home/sspa/Desktop/dev/sqlite_bench/db/sehmasecond.db";
+    const std::string sentwoPath = dbPath + "/sehmasecond.db";
     BenchMarkSenTwo benchTwo(sentwoPath);
 
     benchTwo.CreateTable();

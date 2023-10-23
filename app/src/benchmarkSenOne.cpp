@@ -108,7 +108,7 @@ void BenchMarkSenOne::QueryWithTime(){}
 
 void BenchMarkSenOne::QueryDataWithinTime(int from, int to)
 {
-    std::string select = (boost::format("SELECT * FROM RECORD WHERE myNumber >= %1% AND myNumber <= %2%;") %(std::to_string(from)) %std::to_string(to)).str();
+    std::string select = (boost::format("SELECT * FROM RECORD WHERE timestamp >= %1% AND timestamp <= %2%;") %(std::to_string(from)) %std::to_string(to)).str();
 
     auto callback = [](void* data, int argc, char** argv, char** colName) -> int {
             for (int i = 0; i < argc; ++i) {
