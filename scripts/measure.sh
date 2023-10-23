@@ -19,4 +19,4 @@ topp() (
 )
 
 #T=0.2 O=1 topp ./app/app "-p /home/sspan/dev/temp/sqlite_bench/db"
-T=0.1 O=1 topp ./app "-p /data"
+T=0.1 O=1 topp ./app "-p /data -q 1 -f 1698050051 -t 1700000000"

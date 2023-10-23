@@ -7,7 +7,7 @@ include(cmake/version.cmake)
 if(DEFINED ENV{CICD_NAME})
     project ("$ENV{CICD_NAME}" LANGUAGES C CXX)
 else()
-    project (bsw-recorder LANGUAGES C CXX)
+    project (sqlite_bench LANGUAGES C CXX)
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
@@ -75,73 +75,31 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC FMT_HEADER_ONLY=1)
 
-#######################
-# Enable testing on QEMU
 
-set(CMAKE_CROSSCOMPILING_EMULATOR "$ENV{SDK_QEMU}")
+set(APP_TARGET ${PROJECT_NAME}_EXE)
 
-#######################
-# Testing
-
-if(BUILD_TESTING)
-    add_subdirectory(test/unit-test)
-endif(BUILD_TESTING)
-
-if(APP)
-    add_subdirectory(app)
-endif(APP)
-
-#######################
-# Write version
-#[[
-set_target_properties(${PROJECT_NAME}
-        PROPERTIES
-        VERSION ${GIT_TAG_VERISON}
-        SOVERSION ${GIT_VERSION_MAJOR}
-        INTERFACE_${PROJECT_NAME}_MAJOR_VERSION ${GIT_VERSION_MAJOR}
+set(BENCHMARK_INCLUDE_DIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY
-    COMPATIBLE_INTERFACE_STRING ${PROJECT_NAME}_MAJOR_VERSION
-)
-]]
-#######################
-# Generate the version file for the config file
-#[[
-write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/neext-${PROJECT_NAME}-config-version.cmake"
-    VERSION "${GIT_TAG_VERISON}"
-    COMPATIBILITY AnyNewerVersion
-)        
-]]
-#######################
-# Install target for lib
-#[[
-install(TARGETS ${PROJECT_NAME}
-    EXPORT ${PROJECT_NAME}-targets
-    LIBRARY DESTINATION lib
-    PUBLIC_HEADER DESTINATION include/neext/bsw/persistency
+
+add_executable(${APP_TARGET}
+        ${LIBRARY_SOURCES}
+        main.cpp
+        src/benchmarkSenOne.cpp
+        src/benchmarkSenTwo.cpp
 )
 
-# install export target and config for find_packacge
-install(EXPORT ${PROJECT_NAME}-targets
-    FILE neext-${PROJECT_NAME}-targets.cmake
-    DESTINATION lib/cmake/neext-${PROJECT_NAME}
+target_include_directories(${APP_TARGET} PRIVATE
+        ${LIBRARY_INCLUDE_DIRS}
+        ${BENCHMARK_INCLUDE_DIRS}
+        ${Boost_INCLUDE_DIRS}
+        ${CMAKE_BINARY_DIR}
 )
-]]
-#######################
-# Create package config
 
-#[[
-configure_package_config_file(
-	${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in 
-    "${CMAKE_CURRENT_BINARY_DIR}/neext-${PROJECT_NAME}-config.cmake"
-	INSTALL_DESTINATION lib/cmake/neext-${PROJECT_NAME}
+target_link_libraries(${APP_TARGET}
+        ${Boost_LIBRARIES}
+        ${SQLite3_LIBRARIES}
+        spdlog::spdlog_header_only
 )
-    
-install(FILES 
-    "${CMAKE_CURRENT_BINARY_DIR}/neext-${PROJECT_NAME}-config.cmake" 
-    "${CMAKE_CURRENT_BINARY_DIR}/neext-${PROJECT_NAME}-config-version.cmake" 
-    DESTINATION lib/cmake/neext-${PROJECT_NAME}
-)
-]]

@@ -70,7 +70,11 @@ try
             std::cout << "query to " << queryto << std::endl;
         }
 
-        benchOne.QueryDataWithinTime(queryfrom,queryto);
+        for(int i = 0; i < 10; i++)
+        {
+            benchOne.QueryDataWithinTime(queryfrom,queryto);
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        }
     }
     std::cout << "end query 1" << std::endl;
     std::cout << "end bench 1" << std::endl;
