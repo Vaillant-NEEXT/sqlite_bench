@@ -44,10 +44,15 @@ void BenchMarkSenTwo::WriteSingleData(int dataPointNum, int timeStampNum)
     int sw_id = 10;
     int ecu_uuid = 100;
 
+    auto start = std::chrono::system_clock::now();
+    auto end = std::chrono::system_clock::now();
+
     std::string insert = "";
     std::string sql = "";
     for(int i = 0; i < dataPointNum; i++)
     {
+        start = std::chrono::system_clock::now();
+
         int cur = timestamp;
         sql = (boost::format(createRecordPattern) %(tableName + std::to_string(datapoint_key))).str();
         handle.ExecuteSql(sql);
@@ -68,6 +73,10 @@ void BenchMarkSenTwo::WriteSingleData(int dataPointNum, int timeStampNum)
 
         datapoint_key++;
         timestamp++;
+
+        end = std::chrono::system_clock::now();
+        std::chrono::duration<double> elapsed_seconds = end-start;
+        std::cout << "write computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
@@ -91,6 +100,9 @@ void BenchMarkSenTwo::WriteBulkData(int dataPointNum, int timeStampNum)
     
     int timeStamp = time(nullptr);
     int value = 10;
+
+    auto start = std::chrono::system_clock::now();
+
     for(int i = 0; i < dataPointNum; i++){
         std::string curTable = tableName + std::to_string(datapoint_key);
         std::string sql = (boost::format(createTable) % curTable).str();
@@ -111,6 +123,10 @@ void BenchMarkSenTwo::WriteBulkData(int dataPointNum, int timeStampNum)
         datapoint_key++;
     }
 
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    std::cout << "bulk write computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
+    
     // write data
     std::string metaBulk = "INSERT INTO METADATA "
                             "(datapoint_key, datapoint_name, sw_id, ecu_uuid) "
@@ -144,19 +160,43 @@ void BenchMarkSenTwo::QueryDataWithinTime(int from, int to)
 
     auto callback = [](void* data, int argc, char** argv, char** colName) -> int {
             for (int i = 0; i < argc; ++i) {
-                std::cout << colName[i] << " " << (argv[i] ? argv[i] : "NULL") << std::endl;
-                datapoints.push_back(std::string(colName[i]));
+                //std::cout << colName[i] << " " << (argv[i] ? argv[i] : "NULL") << std::endl;
+
+                if(argv[i]){
+                    datapoints.push_back(std::string(argv[i]));
+                }
             }
 
             return SQLITE_OK;
         };
 
 
+    auto start = std::chrono::system_clock::now();
+
     std::string select = "SELECT datapoint_key FROM METADATA";
 
     handle.ExecuteSql(select, callback);
 
+    const std::string selectPattern = "SELECT * FROM %1% WHERE timestamp >= %2% AND timestamp <= %3%;";
+    std::string tableName = "RECORD_";
 
+    auto selectCallback = [](void* data, int argc, char** argv, char** colName) -> int {
+            for (int i = 0; i < argc; ++i) {
+                //std::cout << colName[i] << " " << (argv[i] ? argv[i] : "NULL") << std::endl;
+            }
+
+            return SQLITE_OK;
+        };
+
+    for(int i = 0; i < datapoints.size(); i++)
+    {
+        select = (boost::format(selectPattern) %(tableName + datapoints[i]) %(std::to_string(from)) %(std::to_string(to))).str();
+        handle.ExecuteSql(select, callback);
+    }
+
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    std::cout << "query computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
     datapoints.clear();
 }
 

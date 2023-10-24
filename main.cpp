@@ -99,6 +99,31 @@ try
     std::cout << "WriteBulkData" << std::endl;
     benchTwo.WriteBulkData(300, 10);
 
+    std::cout << "begin query 2" << std::endl;
+    if (CmdOptionExists(argv, argv+argc, "-q")) 
+    {
+        int queryfrom = 0;
+        int queryto = 0;
+        if (CmdOptionExists(argv, argv+argc, "-f") && CmdOptionExists(argv, argv+argc, "-t")) 
+        {
+            std::string fromStr(GetCmdOption(argv, argv + argc, "-f"));
+            queryfrom = std::stoi(fromStr);
+
+            std::string toStr(GetCmdOption(argv, argv + argc, "-t"));
+            queryto = std::stoi(toStr);
+
+            std::cout << "query from " << queryfrom << std::endl;
+            std::cout << "query to " << queryto << std::endl;
+        }
+
+        for(int i = 0; i < 10; i++)
+        {
+            benchTwo.QueryDataWithinTime(queryfrom,queryto);
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        }
+    }
+    std::cout << "end query 1" << std::endl;
+
     std::cout << "end bench 2" << std::endl;
     std::cout << "------------------------------------------------" << std::endl;
 }

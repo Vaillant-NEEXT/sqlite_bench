@@ -47,7 +47,6 @@ void BenchMarkSenOne::WriteSingleData(int dataPointNum, int timeStampNum)
 
 
     auto start = std::chrono::system_clock::now();
-
     auto end = std::chrono::system_clock::now();
 
     std::string insert = "";
@@ -117,10 +116,10 @@ void BenchMarkSenOne::WriteBulkData(int dataPointNum, int timeStampNumc)
     bulk += ";";
 
     auto start = std::chrono::system_clock::now();
-    auto end = std::chrono::system_clock::now();
 
     handle.ExecuteSql(bulk);
 
+    auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end-start;
     std::cout << "bulk write computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
 
@@ -157,17 +156,29 @@ void BenchMarkSenOne::QueryDataWithinTime(int from, int to)
 
     auto callback = [](void* data, int argc, char** argv, char** colName) -> int {
             for (int i = 0; i < argc; ++i) {
-                std::cout << colName[i] << " " << (argv[i] ? argv[i] : "NULL") << std::endl;
+                //std::cout << colName[i] << " " << (argv[i] ? argv[i] : "NULL") << std::endl;
             }
 
             return SQLITE_OK;
         };
 
+    auto start = std::chrono::system_clock::now();
+
     handle.ExecuteSql(select, callback);
+
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    std::cout << "query computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
 }
 
 void BenchMarkSenOne::DeletDataOlderThan(int time)
 {
+    auto start = std::chrono::system_clock::now();
+
     std::string remove = (boost::format("DELETE FROM RECORD WHERE timestamp < %1%;") %(std::to_string(time))).str();
     handle.ExecuteSql(remove);
+
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    std::cout << "delete computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
 }
