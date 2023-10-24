@@ -46,6 +46,10 @@ void BenchMarkSenOne::WriteSingleData(int dataPointNum, int timeStampNum)
                                         "VALUES (%1% ,%2% ,%3% ,%4% ,%5%);";
 
 
+    auto start = std::chrono::system_clock::now();
+
+    auto end = std::chrono::system_clock::now();
+
     std::string insert = "";
 
     // just some raw value
@@ -58,6 +62,7 @@ void BenchMarkSenOne::WriteSingleData(int dataPointNum, int timeStampNum)
 
     for(int i = 0; i < dataPointNum; i++)
     {
+        start = std::chrono::system_clock::now();
         int cur = timestamp;
         for(int j = 0; j < timeStampNum; j++)
         {
@@ -75,6 +80,10 @@ void BenchMarkSenOne::WriteSingleData(int dataPointNum, int timeStampNum)
 
         datapoint_key++;
         timestamp++;
+
+        end = std::chrono::system_clock::now();
+        std::chrono::duration<double> elapsed_seconds = end-start;
+        std::cout << "write computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
@@ -106,8 +115,14 @@ void BenchMarkSenOne::WriteBulkData(int dataPointNum, int timeStampNumc)
     bulk.pop_back();
 
     bulk += ";";
+
+    auto start = std::chrono::system_clock::now();
+    auto end = std::chrono::system_clock::now();
+
     handle.ExecuteSql(bulk);
 
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    std::cout << "bulk write computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
 
     // write data
     bulk = "INSERT INTO METADATA "

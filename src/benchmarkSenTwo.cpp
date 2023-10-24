@@ -139,18 +139,25 @@ void BenchMarkSenTwo::QueryWithTime(){}
 
 void BenchMarkSenTwo::QueryDataWithinTime(int from, int to)
 {
-    std::string select = (boost::format("SELECT * FROM RECORD WHERE timestamp >= %1% AND timestamp <= %2%;") %(std::to_string(from)) %std::to_string(to)).str();
+    //get datapoint_keys from meta table 
+    static std::vector<std::string> datapoints;
 
     auto callback = [](void* data, int argc, char** argv, char** colName) -> int {
             for (int i = 0; i < argc; ++i) {
                 std::cout << colName[i] << " " << (argv[i] ? argv[i] : "NULL") << std::endl;
+                datapoints.push_back(std::string(colName[i]));
             }
 
             return SQLITE_OK;
         };
 
+
+    std::string select = "SELECT datapoint_key FROM METADATA";
+
     handle.ExecuteSql(select, callback);
 
+
+    datapoints.clear();
 }
 
 void BenchMarkSenTwo::DeletDataOlderThan(int time){}
