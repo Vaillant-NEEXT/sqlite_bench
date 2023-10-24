@@ -77,6 +77,11 @@ try
         }
     }
     std::cout << "end query 1" << std::endl;
+
+    std::cout << "------------------------------------------------" << std::endl;
+    std::cout << "begin delete 1" << std::endl;
+    benchOne.DeletDataOlderThan(time(nullptr) + 10);
+
     std::cout << "end bench 1" << std::endl;
 
     std::this_thread::sleep_for(std::chrono::milliseconds(3000));

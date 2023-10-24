@@ -23,13 +23,8 @@ void BenchMarkSenTwo::WriteSingleData(int dataPointNum, int timeStampNum)
     std::string tableName = "RECORD_";
     std::string datapoint_name = "flow_temp_circult_";
 
-    std::string sql = "CREATE TABLE IF NOT EXISTS " + tableName + "("
-                        "timestamp	INT NOT NULL,"
-                        "value BLOB,"
-                        "PRIMARY KEY(timestamp));";
-
     const std::string createRecordPattern = "CREATE TABLE IF NOT EXISTS %1%("
-                                            "timestamp	INT NOT NULL,"
+                                            "timestamp INT NOT NULL,"
                                             "value BLOB,"
                                             "PRIMARY KEY(timestamp));";
 
@@ -37,8 +32,8 @@ void BenchMarkSenTwo::WriteSingleData(int dataPointNum, int timeStampNum)
                                             "(timestamp, value)"
                                             "VALUES (%2% ,%3%);";
     
-    const std::string insertMetaPattern = "INSERT INTO METADATA"
-                                            "(datapoint_key, datapoint_name, sw_id, ecu_uuid)"
+    const std::string insertMetaPattern = "INSERT INTO METADATA "
+                                            "(datapoint_key, datapoint_name, sw_id, ecu_uuid) "
                                             "VALUES (%1%, %2% ,%3%, %4%);";
 
 
@@ -50,10 +45,11 @@ void BenchMarkSenTwo::WriteSingleData(int dataPointNum, int timeStampNum)
     int ecu_uuid = 100;
 
     std::string insert = "";
+    std::string sql = "";
     for(int i = 0; i < dataPointNum; i++)
     {
         int cur = timestamp;
-        std::string sql = (boost::format(createRecordPattern) %(tableName + std::to_string(datapoint_key))).str();
+        sql = (boost::format(createRecordPattern) %(tableName + std::to_string(datapoint_key))).str();
         handle.ExecuteSql(sql);
 
         for(int j = 0; j < timeStampNum; j++)
@@ -65,7 +61,7 @@ void BenchMarkSenTwo::WriteSingleData(int dataPointNum, int timeStampNum)
         }
 
 
-        insert = (boost::format(insertMetaPattern) % datapoint_key %(datapoint_name + std::to_string(datapoint_key)) 
+        insert = (boost::format(insertMetaPattern) % datapoint_key %("'" + datapoint_name + std::to_string(datapoint_key) + "'") 
                                                     %sw_id  %ecu_uuid).str();
 
         handle.ExecuteSql(insert);
@@ -84,9 +80,9 @@ void BenchMarkSenTwo::WriteBulkData(int dataPointNum, int timeStampNum)
     int datapoint_key = 2;
     std::string tableName = "RECORD_";
     const std::string createTable = "CREATE TABLE IF NOT EXISTS  %1% ("
-                        "timestamp INT NOT NULL,"
-                        "value BLOB,"
-                        "PRIMARY KEY(timestamp));";
+                                    "timestamp INT NOT NULL,"
+                                    "value BLOB,"
+                                    "PRIMARY KEY(timestamp));";
 
     //write timestamp to datapoint table
     const std::string insertTimestamp = "INSERT INTO %1% " 
@@ -143,6 +139,17 @@ void BenchMarkSenTwo::QueryWithTime(){}
 
 void BenchMarkSenTwo::QueryDataWithinTime(int from, int to)
 {
+    std::string select = (boost::format("SELECT * FROM RECORD WHERE timestamp >= %1% AND timestamp <= %2%;") %(std::to_string(from)) %std::to_string(to)).str();
+
+    auto callback = [](void* data, int argc, char** argv, char** colName) -> int {
+            for (int i = 0; i < argc; ++i) {
+                std::cout << colName[i] << " " << (argv[i] ? argv[i] : "NULL") << std::endl;
+            }
+
+            return SQLITE_OK;
+        };
+
+    handle.ExecuteSql(select, callback);
 
 }
 

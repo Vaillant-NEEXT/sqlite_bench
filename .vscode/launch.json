@@ -8,7 +8,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/app/app",
+            "program": "${workspaceFolder}/build/sqlite_bench_EXE",
             "args": [
                 "-p",
                 "/home/sspan/dev/temp/sqlite_bench/db",

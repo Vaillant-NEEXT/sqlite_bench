@@ -151,4 +151,8 @@ void BenchMarkSenOne::QueryDataWithinTime(int from, int to)
     handle.ExecuteSql(select, callback);
 }
 
-void BenchMarkSenOne::DeletDataOlderThan(int time){}
+void BenchMarkSenOne::DeletDataOlderThan(int time)
+{
+    std::string remove = (boost::format("DELETE FROM RECORD WHERE timestamp < %1%;") %(std::to_string(time))).str();
+    handle.ExecuteSql(remove);
+}
