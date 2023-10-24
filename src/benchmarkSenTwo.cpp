@@ -191,7 +191,7 @@ void BenchMarkSenTwo::QueryDataWithinTime(int from, int to)
     for(int i = 0; i < datapoints.size(); i++)
     {
         select = (boost::format(selectPattern) %(tableName + datapoints[i]) %(std::to_string(from)) %(std::to_string(to))).str();
-        handle.ExecuteSql(select, callback);
+        handle.ExecuteSql(select, selectCallback);
     }
 
     auto end = std::chrono::system_clock::now();
@@ -200,4 +200,38 @@ void BenchMarkSenTwo::QueryDataWithinTime(int from, int to)
     datapoints.clear();
 }
 
-void BenchMarkSenTwo::DeletDataOlderThan(int time){}
+void BenchMarkSenTwo::DeletDataOlderThan(int time)
+{
+    std::string tableName = "RECORD_";
+
+    auto start = std::chrono::system_clock::now();
+
+    static std::vector<std::string> datapoints;
+        auto callback = [](void* data, int argc, char** argv, char** colName) -> int {
+            for (int i = 0; i < argc; ++i) {
+                //std::cout << colName[i] << " " << (argv[i] ? argv[i] : "NULL") << std::endl;
+
+                if(argv[i]){
+                    datapoints.push_back(std::string(argv[i]));
+                }
+            }
+
+            return SQLITE_OK;
+        };
+
+    std::string select = "SELECT datapoint_key FROM METADATA";
+
+    handle.ExecuteSql(select, callback);
+    
+    const std::string removePattern = "DELETE FROM %1% WHERE timestamp < %2%;";
+
+    for(int i = 0; i < datapoints.size(); i++)
+    {
+        std::string remove = (boost::format(removePattern) %(tableName + datapoints[i]) %(std::to_string(time))).str();
+        handle.ExecuteSql(remove);
+    }
+
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    std::cout << "delete computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
+}

@@ -124,6 +124,10 @@ try
     }
     std::cout << "end query 1" << std::endl;
 
+    std::cout << "------------------------------------------------" << std::endl;
+    std::cout << "begin delete 2" << std::endl;
+    benchTwo.DeletDataOlderThan(time(nullptr) + 10);
+
     std::cout << "end bench 2" << std::endl;
     std::cout << "------------------------------------------------" << std::endl;
 }
