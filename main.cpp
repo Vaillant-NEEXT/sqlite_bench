@@ -84,13 +84,14 @@ try
     benchOne.DeletDataOlderThan(time(nullptr) + 1000);
 
     std::cout << "end bench 1" << std::endl;
-
     std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+
+    
     std::cout << "begin bench 2" << std::endl;
     const std::string sentwoPath = dbPath + "/sehmasecond.db";
     BenchMarkSenTwo benchTwo(sentwoPath);
     
-    benchOne.SetPragma();
+    benchTwo.SetPragma();
     benchTwo.CreateTable();
 
     std::cout << "------------------------------------------------" << std::endl;
