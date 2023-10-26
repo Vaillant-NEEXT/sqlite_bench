@@ -78,7 +78,7 @@ void BenchMarkSenOne::WriteSingleData(int dataPointNum, int timeRange)
         if(t%100 == 0){
             end = std::chrono::system_clock::now();
             std::chrono::duration<double> elapsed_seconds = end-start;
-            std::cout << "write 100 timestamp computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
+            std::cout << "write " << t << " timestamp computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
             start = std::chrono::system_clock::now();
         }
 
@@ -139,7 +139,7 @@ void BenchMarkSenOne::WriteBulkData(int dataPointNum, int timeRange)
         if(t%100 == 0){
             end = std::chrono::system_clock::now();
             std::chrono::duration<double> elapsed_seconds = end-start;
-            std::cout << "write 100 timestamp computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
+            std::cout << "write " << t << " timestamp computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
             start = std::chrono::system_clock::now();
         }
     }

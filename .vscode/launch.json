@@ -13,7 +13,7 @@
                 "-p",
                 "/home/sspan/dev/temp/sqlite_bench/db",
                 "-r",
-                "100",
+                "300",
                 "-q",
                 "1",
                 "-f",

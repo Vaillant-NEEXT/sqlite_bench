@@ -53,25 +53,24 @@ void BenchMarkSenTwo::WriteSingleData(int dataPointNum, int timeRange)
     {
         for(int i = 0; i < dataPointNum; i++)
         {
-            sql = (boost::format(createRecordPattern) %(tableName + std::to_string(datapoint_key))).str();
+            sql = (boost::format(createRecordPattern) %(tableName + std::to_string(datapoint_key+i))).str();
             handle.ExecuteSql(sql);
 
-            insert = (boost::format(insertRecordPattern) %(tableName + std::to_string(datapoint_key)) % (timestamp+t) %value).str();
+            insert = (boost::format(insertRecordPattern) %(tableName + std::to_string(datapoint_key+i)) % (timestamp+t) %value).str();
             handle.ExecuteSql(insert);
 
 
-            insert = (boost::format(insertMetaPattern) % datapoint_key %("'" + datapoint_name + std::to_string(datapoint_key) + "'") 
+            insert = (boost::format(insertMetaPattern) % std::to_string(datapoint_key+i) %("'" + datapoint_name + std::to_string(datapoint_key+i) + "'") 
                                                         %sw_id  %ecu_uuid).str();
             handle.ExecuteSql(insert);
+        }
 
-            datapoint_key++;
-
-            if(t%100 == 0){
-                end = std::chrono::system_clock::now();
-                std::chrono::duration<double> elapsed_seconds = end-start;
-                std::cout << "write 100 timestamp computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
-                start = std::chrono::system_clock::now();
-            }
+        if(t%100 == 0)
+        {
+            end = std::chrono::system_clock::now();
+            std::chrono::duration<double> elapsed_seconds = end-start;
+            std::cout << "write " << t << " timestamp computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
+            start = std::chrono::system_clock::now();
         }
     }
 }
@@ -97,6 +96,7 @@ void BenchMarkSenTwo::WriteBulkData(int dataPointNum, int timeRange)
     int value = 10;
 
     auto start = std::chrono::system_clock::now();
+    auto end = std::chrono::system_clock::now();
 
     for(int t = 0; t < timeRange; t++)
     {
@@ -120,7 +120,7 @@ void BenchMarkSenTwo::WriteBulkData(int dataPointNum, int timeRange)
             handle.ExecuteSql(bulk);
         }
 
-        
+        /*
         // write data
         std::string metaBulk = "INSERT INTO METADATA "
                                 "(datapoint_key, datapoint_name, sw_id, ecu_uuid) "
@@ -141,6 +141,15 @@ void BenchMarkSenTwo::WriteBulkData(int dataPointNum, int timeRange)
 
         metaBulk += ";";
         handle.ExecuteSql(metaBulk);
+        */
+
+        if(t%100 == 0)
+        {
+            end = std::chrono::system_clock::now();
+            std::chrono::duration<double> elapsed_seconds = end-start;
+            std::cout << "write " << t << " timestamp computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
+            start = std::chrono::system_clock::now();
+        }
     }
 
 }

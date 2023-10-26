@@ -81,7 +81,7 @@ try
 
     std::cout << "------------------------------------------------" << std::endl;
     std::cout << "begin delete 1" << std::endl;
-    benchOne.DeletDataOlderThan(time(nullptr) + 10);
+    benchOne.DeletDataOlderThan(time(nullptr) + 1000);
 
     std::cout << "end bench 1" << std::endl;
 
@@ -89,7 +89,8 @@ try
     std::cout << "begin bench 2" << std::endl;
     const std::string sentwoPath = dbPath + "/sehmasecond.db";
     BenchMarkSenTwo benchTwo(sentwoPath);
-
+    
+    benchOne.SetPragma();
     benchTwo.CreateTable();
 
     std::cout << "------------------------------------------------" << std::endl;
@@ -127,7 +128,7 @@ try
 
     std::cout << "------------------------------------------------" << std::endl;
     std::cout << "begin delete 2" << std::endl;
-    benchTwo.DeletDataOlderThan(time(nullptr) + 10);
+    benchTwo.DeletDataOlderThan(time(nullptr) + 1000);
 
     std::cout << "end bench 2" << std::endl;
     std::cout << "------------------------------------------------" << std::endl;
