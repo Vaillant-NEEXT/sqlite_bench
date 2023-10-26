@@ -7,9 +7,9 @@ class BenchMarkSenTwo : public BenchMark{
 
         void CreateTable();
 
-        void WriteSingleData(int dataPointNum, int timeInterval, int timeRange);
+        void WriteSingleData(int dataPointNum, int timeRange);
 
-        void WriteBulkData(int dataPointNum, int timeInterval);
+        void WriteBulkData(int dataPointNum, int timeRange);
 
         void QueryWithTime();
 

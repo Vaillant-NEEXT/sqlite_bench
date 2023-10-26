@@ -12,6 +12,8 @@
             "args": [
                 "-p",
                 "/home/sspan/dev/temp/sqlite_bench/db",
+                "-r",
+                "100",
                 "-q",
                 "1",
                 "-f",

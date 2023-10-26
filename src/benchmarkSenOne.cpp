@@ -34,7 +34,7 @@ void BenchMarkSenOne::CreateTable()
     handle.ExecuteSql(sql);
 }
 
-void BenchMarkSenOne::WriteSingleData(int dataPointNum, int timeInterval, int timeRange)
+void BenchMarkSenOne::WriteSingleData(int dataPointNum, int timeRange)
 {
     //first write record than meta data
     const std::string insertRecordPattern = "INSERT INTO RECORD"
@@ -61,17 +61,11 @@ void BenchMarkSenOne::WriteSingleData(int dataPointNum, int timeInterval, int ti
 
     for(int t = 0; t < timeRange; t++)
     {
-        start = std::chrono::system_clock::now();
         for(int i = 0; i < dataPointNum; i++)
         {
-            int cur = timestamp;
-            for(int j = 0; j < timeInterval; j++)
-            {
-                insert = (boost::format(insertRecordPattern) % datapoint_key % cur % value).str();
+            insert = (boost::format(insertRecordPattern) % datapoint_key % (timestamp+t) % value).str();
 
-                handle.ExecuteSql(insert);
-                cur++;
-            }
+            handle.ExecuteSql(insert);
 
             insert = (boost::format(insertMetaPattern) % datapoint_key %(datapoint_name + std::to_string(datapoint_key)) 
                                                         %sw_id  %ecu_uuid % timestamp).str();
@@ -81,15 +75,18 @@ void BenchMarkSenOne::WriteSingleData(int dataPointNum, int timeInterval, int ti
             datapoint_key++;
         }
 
-        end = std::chrono::system_clock::now();
-        std::chrono::duration<double> elapsed_seconds = end-start;
-        std::cout << "write computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    }
+        if(t%100 == 0){
+            end = std::chrono::system_clock::now();
+            std::chrono::duration<double> elapsed_seconds = end-start;
+            std::cout << "write 100 timestamp computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
+            start = std::chrono::system_clock::now();
+        }
 
+        //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
 }
 
-void BenchMarkSenOne::WriteBulkData(int dataPointNum, int timeInterval)
+void BenchMarkSenOne::WriteBulkData(int dataPointNum, int timeRange)
 {
     std::string bulk = "INSERT INTO RECORD "
                         "(datapoint_key, timestamp, value) "
@@ -99,53 +96,53 @@ void BenchMarkSenOne::WriteBulkData(int dataPointNum, int timeInterval)
     int datapoint_key = 1;
     int timestamp = time(nullptr);
     int data = 10;
+    auto start = std::chrono::system_clock::now();
+    auto end = std::chrono::system_clock::now();
 
-    for(int i = 0; i < dataPointNum; i++){
-        int cur = timestamp;
-        for(int j = 0; j < timeInterval; j++){
-            cur++;
-            data++;
-            bulk += " (" + std::to_string(datapoint_key) + "," + std::to_string(cur) + "," + std::to_string(data) + "),";
+    for(int t = 0; t < timeRange; t++)
+    {
+        for(int i = 0; i < dataPointNum; i++)
+        {
+            bulk += " (" + std::to_string(datapoint_key) + "," + std::to_string(timestamp+t) + "," + std::to_string(data) + "),";
+            datapoint_key++;
+        }
+        
+        bulk.pop_back();
+        bulk += ";";
+
+        handle.ExecuteSql(bulk);
+
+        // write data
+        bulk = "INSERT INTO METADATA "
+                            "(datapoint_key, datapoint_name, sw_id, ecu_uuid, ts) "
+                            "VALUES";
+
+        int swid = 10;
+        int uuid = 1000;
+        datapoint_key = 2;
+        timestamp++;
+        std::string dataPointName = "flow_temp_circult_";
+        for(int i = 0; i < dataPointNum; i++){
+            swid += datapoint_key;
+            uuid += datapoint_key;
+            bulk += " (" + std::to_string(datapoint_key) + "," + "'" + dataPointName + std::to_string(datapoint_key) + "'" + "," + std::to_string(swid) + 
+                    "," + std::to_string(uuid) + "," + std::to_string(timestamp) + "),";
+
+            datapoint_key++;
         }
 
-        datapoint_key++;
+        bulk.pop_back();
+
+        bulk += ";";
+        handle.ExecuteSql(bulk);
+
+        if(t%100 == 0){
+            end = std::chrono::system_clock::now();
+            std::chrono::duration<double> elapsed_seconds = end-start;
+            std::cout << "write 100 timestamp computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
+            start = std::chrono::system_clock::now();
+        }
     }
-    
-    bulk.pop_back();
-
-    bulk += ";";
-
-    auto start = std::chrono::system_clock::now();
-
-    handle.ExecuteSql(bulk);
-
-    auto end = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end-start;
-    std::cout << "bulk write computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
-
-    // write data
-    bulk = "INSERT INTO METADATA "
-                        "(datapoint_key, datapoint_name, sw_id, ecu_uuid, ts) "
-                        "VALUES";
-
-    int swid = 10;
-    int uuid = 1000;
-    datapoint_key = 2;
-    timestamp++;
-    std::string dataPointName = "flow_temp_circult_";
-    for(int i = 0; i < dataPointNum; i++){
-        swid += datapoint_key;
-        uuid += datapoint_key;
-        bulk += " (" + std::to_string(datapoint_key) + "," + "'" + dataPointName + std::to_string(datapoint_key) + "'" + "," + std::to_string(swid) + 
-                "," + std::to_string(uuid) + "," + std::to_string(timestamp) + "),";
-
-        datapoint_key++;
-    }
-
-    bulk.pop_back();
-
-    bulk += ";";
-    handle.ExecuteSql(bulk);
 }
 
 void BenchMarkSenOne::QueryWithTime(){}

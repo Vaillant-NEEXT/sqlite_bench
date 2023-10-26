@@ -29,28 +29,29 @@ bool CmdOptionExists(char** begin, char** end, const std::string& option)
 int main(int argc, char **argv) {
 try
 {
-    if(!CmdOptionExists(argv, argv+argc, "-p"))
+    if(!CmdOptionExists(argv, argv+argc, "-p") || !CmdOptionExists(argv, argv+argc, "-r"))
     {
-        std::cout << "no path defined" << std::endl;
+        std::cout << "no path defined or no range defined" << std::endl;
         return 0;
     }
 
     std::string dbPath(GetCmdOption(argv, argv + argc, "-p"));
+    std::string range(GetCmdOption(argv, argv + argc, "-r"));
 
     std::cout << "------------------------------------------------" << std::endl;
     std::cout << "begin bench 1" << std::endl;
     const std::string senonePath = dbPath + "/sehmafirst.db";
     BenchMarkSenOne benchOne(senonePath);
-
+    benchOne.SetPragma();
     benchOne.CreateTable();
 
     std::cout << "------------------------------------------------" << std::endl;
     std::cout << "WriteSingleData" << std::endl;
-    benchOne.WriteSingleData(300,  5, 3600);
+    benchOne.WriteSingleData(300, std::stoi(range));
 
     std::cout << "------------------------------------------------" << std::endl;
     std::cout << "WriteBulkData" << std::endl;
-    //benchOne.WriteBulkData(300, 10);
+    benchOne.WriteBulkData(300, std::stoi(range));
 
     std::cout << "------------------------------------------------" << std::endl;
     std::cout << "begin query 1" << std::endl;
@@ -93,11 +94,11 @@ try
 
     std::cout << "------------------------------------------------" << std::endl;
     std::cout << "WriteSingleData" << std::endl;
-    benchTwo.WriteSingleData(300, 5, 3600);
+    benchTwo.WriteSingleData(300, std::stoi(range));
 
     std::cout << "------------------------------------------------" << std::endl;
     std::cout << "WriteBulkData" << std::endl;
-    //benchTwo.WriteBulkData(300, 10);
+    benchTwo.WriteBulkData(300, std::stoi(range));
 
     std::cout << "begin query 2" << std::endl;
     if (CmdOptionExists(argv, argv+argc, "-q")) 

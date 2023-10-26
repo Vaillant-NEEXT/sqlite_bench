@@ -17,7 +17,7 @@ void BenchMarkSenTwo::CreateTable()
     handle.ExecuteSql(sql);
 }
 
-void BenchMarkSenTwo::WriteSingleData(int dataPointNum, int timeInterval, int timeRange)
+void BenchMarkSenTwo::WriteSingleData(int dataPointNum, int timeRange)
 {
     //each datapoint key has a table
     std::string tableName = "RECORD_";
@@ -39,7 +39,7 @@ void BenchMarkSenTwo::WriteSingleData(int dataPointNum, int timeInterval, int ti
 
     // just some raw value
     int datapoint_key = 1;
-    int timestamp = 100000000; 
+    int timestamp = time(nullptr);; 
     int value = 20;
     int sw_id = 10;
     int ecu_uuid = 100;
@@ -49,41 +49,34 @@ void BenchMarkSenTwo::WriteSingleData(int dataPointNum, int timeInterval, int ti
 
     std::string insert = "";
     std::string sql = "";
-    for(int i = 0; i < dataPointNum; i++)
+    for(int t = 0; t < timeRange; t++)
     {
-        start = std::chrono::system_clock::now();
-
-        int cur = timestamp;
-        sql = (boost::format(createRecordPattern) %(tableName + std::to_string(datapoint_key))).str();
-        handle.ExecuteSql(sql);
-
-        for(int j = 0; j < timeInterval; j++)
+        for(int i = 0; i < dataPointNum; i++)
         {
-            insert = (boost::format(insertRecordPattern) %(tableName + std::to_string(datapoint_key)) %cur %value).str();
+            sql = (boost::format(createRecordPattern) %(tableName + std::to_string(datapoint_key))).str();
+            handle.ExecuteSql(sql);
 
+            insert = (boost::format(insertRecordPattern) %(tableName + std::to_string(datapoint_key)) % (timestamp+t) %value).str();
             handle.ExecuteSql(insert);
-            cur++;
+
+
+            insert = (boost::format(insertMetaPattern) % datapoint_key %("'" + datapoint_name + std::to_string(datapoint_key) + "'") 
+                                                        %sw_id  %ecu_uuid).str();
+            handle.ExecuteSql(insert);
+
+            datapoint_key++;
+
+            if(t%100 == 0){
+                end = std::chrono::system_clock::now();
+                std::chrono::duration<double> elapsed_seconds = end-start;
+                std::cout << "write 100 timestamp computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
+                start = std::chrono::system_clock::now();
+            }
         }
-
-
-        insert = (boost::format(insertMetaPattern) % datapoint_key %("'" + datapoint_name + std::to_string(datapoint_key) + "'") 
-                                                    %sw_id  %ecu_uuid).str();
-
-        handle.ExecuteSql(insert);
-
-        datapoint_key++;
-        timestamp++;
-
-        end = std::chrono::system_clock::now();
-        std::chrono::duration<double> elapsed_seconds = end-start;
-        std::cout << "write computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
-
 }
 
-void BenchMarkSenTwo::WriteBulkData(int dataPointNum, int timeInterval)
+void BenchMarkSenTwo::WriteBulkData(int dataPointNum, int timeRange)
 {
     // for each data a table 
     int datapoint_key = 2;
@@ -99,56 +92,57 @@ void BenchMarkSenTwo::WriteBulkData(int dataPointNum, int timeInterval)
                                         "VALUES ";
     
     int timeStamp = time(nullptr);
+    int timeInterval = 10;
+    timeRange /= timeInterval;
     int value = 10;
 
     auto start = std::chrono::system_clock::now();
 
-    for(int i = 0; i < dataPointNum; i++){
-        std::string curTable = tableName + std::to_string(datapoint_key);
-        std::string sql = (boost::format(createTable) % curTable).str();
-        handle.ExecuteSql(sql);
+    for(int t = 0; t < timeRange; t++)
+    {
+        for(int i = 0; i < dataPointNum; i++)
+        {
+            std::string curTable = tableName + std::to_string(datapoint_key+i);
+            std::string sql = (boost::format(createTable) % curTable).str();
+            handle.ExecuteSql(sql);
 
-        //insert row
-        std::string bulk = (boost::format(insertTimestamp) %curTable).str();
-        int cur = timeStamp;
-        for(int j = 0; j < timeInterval; j++){
-            bulk += " (" + std::to_string(cur) + "," + std::to_string(value) + "),";;
-            cur++;
+            //insert row
+            std::string bulk = (boost::format(insertTimestamp) %curTable).str();
+            int cur = timeStamp+t;
+            for(int j = 0; j < timeInterval; j++)
+            {
+                bulk += " (" + std::to_string(cur) + "," + std::to_string(value) + "),";;
+                cur++;
+            }
+
+            bulk.pop_back();
+            bulk += ";";
+            handle.ExecuteSql(bulk);
         }
 
-        bulk.pop_back();
-        bulk += ";";
-        handle.ExecuteSql(bulk);
+        
+        // write data
+        std::string metaBulk = "INSERT INTO METADATA "
+                                "(datapoint_key, datapoint_name, sw_id, ecu_uuid) "
+                                "VALUES";
 
-        datapoint_key++;
+        int swid = 10;
+        int uuid = 1000;
+        std::string dataPointName = "flow_temp_circult_";
+        for(int i = 0; i < dataPointNum; i++){
+            swid += datapoint_key+i;
+            uuid += datapoint_key+i;
+            metaBulk += " (" + std::to_string(datapoint_key+i) + "," + "'" + dataPointName + std::to_string(datapoint_key+i) + "'" + "," + std::to_string(swid) + 
+                    "," + std::to_string(uuid) + "),";
+
+        }
+
+        metaBulk.pop_back();
+
+        metaBulk += ";";
+        handle.ExecuteSql(metaBulk);
     }
 
-    auto end = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end-start;
-    std::cout << "bulk write computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
-    
-    // write data
-    std::string metaBulk = "INSERT INTO METADATA "
-                            "(datapoint_key, datapoint_name, sw_id, ecu_uuid) "
-                            "VALUES";
-
-    int swid = 10;
-    int uuid = 1000;
-    datapoint_key = 2;
-    std::string dataPointName = "flow_temp_circult_";
-    for(int i = 0; i < timeInterval; i++){
-        swid += datapoint_key;
-        uuid += datapoint_key;
-        metaBulk += " (" + std::to_string(datapoint_key) + "," + "'" + dataPointName + std::to_string(datapoint_key) + "'" + "," + std::to_string(swid) + 
-                "," + std::to_string(uuid) + "),";
-
-        datapoint_key++;
-    }
-
-    metaBulk.pop_back();
-
-    metaBulk += ";";
-    handle.ExecuteSql(metaBulk);
 }
 
 void BenchMarkSenTwo::QueryWithTime(){}
