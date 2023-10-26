@@ -17,7 +17,7 @@ void BenchMarkSenTwo::CreateTable()
     handle.ExecuteSql(sql);
 }
 
-void BenchMarkSenTwo::WriteSingleData(int dataPointNum, int timeStampNum)
+void BenchMarkSenTwo::WriteSingleData(int dataPointNum, int timeInterval, int timeRange)
 {
     //each datapoint key has a table
     std::string tableName = "RECORD_";
@@ -57,7 +57,7 @@ void BenchMarkSenTwo::WriteSingleData(int dataPointNum, int timeStampNum)
         sql = (boost::format(createRecordPattern) %(tableName + std::to_string(datapoint_key))).str();
         handle.ExecuteSql(sql);
 
-        for(int j = 0; j < timeStampNum; j++)
+        for(int j = 0; j < timeInterval; j++)
         {
             insert = (boost::format(insertRecordPattern) %(tableName + std::to_string(datapoint_key)) %cur %value).str();
 
@@ -78,12 +78,12 @@ void BenchMarkSenTwo::WriteSingleData(int dataPointNum, int timeStampNum)
         std::chrono::duration<double> elapsed_seconds = end-start;
         std::cout << "write computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
 }
 
-void BenchMarkSenTwo::WriteBulkData(int dataPointNum, int timeStampNum)
+void BenchMarkSenTwo::WriteBulkData(int dataPointNum, int timeInterval)
 {
     // for each data a table 
     int datapoint_key = 2;
@@ -111,7 +111,7 @@ void BenchMarkSenTwo::WriteBulkData(int dataPointNum, int timeStampNum)
         //insert row
         std::string bulk = (boost::format(insertTimestamp) %curTable).str();
         int cur = timeStamp;
-        for(int j = 0; j < timeStampNum; j++){
+        for(int j = 0; j < timeInterval; j++){
             bulk += " (" + std::to_string(cur) + "," + std::to_string(value) + "),";;
             cur++;
         }
@@ -136,7 +136,7 @@ void BenchMarkSenTwo::WriteBulkData(int dataPointNum, int timeStampNum)
     int uuid = 1000;
     datapoint_key = 2;
     std::string dataPointName = "flow_temp_circult_";
-    for(int i = 0; i < timeStampNum; i++){
+    for(int i = 0; i < timeInterval; i++){
         swid += datapoint_key;
         uuid += datapoint_key;
         metaBulk += " (" + std::to_string(datapoint_key) + "," + "'" + dataPointName + std::to_string(datapoint_key) + "'" + "," + std::to_string(swid) + 

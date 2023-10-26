@@ -34,7 +34,7 @@ void BenchMarkSenOne::CreateTable()
     handle.ExecuteSql(sql);
 }
 
-void BenchMarkSenOne::WriteSingleData(int dataPointNum, int timeStampNum)
+void BenchMarkSenOne::WriteSingleData(int dataPointNum, int timeInterval, int timeRange)
 {
     //first write record than meta data
     const std::string insertRecordPattern = "INSERT INTO RECORD"
@@ -53,43 +53,43 @@ void BenchMarkSenOne::WriteSingleData(int dataPointNum, int timeStampNum)
 
     // just some raw value
     int datapoint_key = 1;
-    int timestamp = 100000000; 
+    int timestamp = time(nullptr);
     int value = 20;
     int sw_id = 10;
     int ecu_uuid = 100;
     std::string datapoint_name = "flow_temp_circult_";
 
-    for(int i = 0; i < dataPointNum; i++)
+    for(int t = 0; t < timeRange; t++)
     {
         start = std::chrono::system_clock::now();
-        int cur = timestamp;
-        for(int j = 0; j < timeStampNum; j++)
+        for(int i = 0; i < dataPointNum; i++)
         {
-            insert = (boost::format(insertRecordPattern) % datapoint_key % cur % value).str();
+            int cur = timestamp;
+            for(int j = 0; j < timeInterval; j++)
+            {
+                insert = (boost::format(insertRecordPattern) % datapoint_key % cur % value).str();
+
+                handle.ExecuteSql(insert);
+                cur++;
+            }
+
+            insert = (boost::format(insertMetaPattern) % datapoint_key %(datapoint_name + std::to_string(datapoint_key)) 
+                                                        %sw_id  %ecu_uuid % timestamp).str();
 
             handle.ExecuteSql(insert);
-            cur++;
+
+            datapoint_key++;
         }
-
-
-        insert = (boost::format(insertMetaPattern) % datapoint_key %(datapoint_name + std::to_string(datapoint_key)) 
-                                                    %sw_id  %ecu_uuid % timestamp).str();
-
-        handle.ExecuteSql(insert);
-
-        datapoint_key++;
-        timestamp++;
 
         end = std::chrono::system_clock::now();
         std::chrono::duration<double> elapsed_seconds = end-start;
         std::cout << "write computation " << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 
 }
 
-void BenchMarkSenOne::WriteBulkData(int dataPointNum, int timeStampNumc)
+void BenchMarkSenOne::WriteBulkData(int dataPointNum, int timeInterval)
 {
     std::string bulk = "INSERT INTO RECORD "
                         "(datapoint_key, timestamp, value) "
@@ -102,7 +102,7 @@ void BenchMarkSenOne::WriteBulkData(int dataPointNum, int timeStampNumc)
 
     for(int i = 0; i < dataPointNum; i++){
         int cur = timestamp;
-        for(int j = 0; j < timeStampNumc; j++){
+        for(int j = 0; j < timeInterval; j++){
             cur++;
             data++;
             bulk += " (" + std::to_string(datapoint_key) + "," + std::to_string(cur) + "," + std::to_string(data) + "),";

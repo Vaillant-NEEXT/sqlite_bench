@@ -46,11 +46,11 @@ try
 
     std::cout << "------------------------------------------------" << std::endl;
     std::cout << "WriteSingleData" << std::endl;
-    benchOne.WriteSingleData(300, 10);
+    benchOne.WriteSingleData(300,  5, 3600);
 
     std::cout << "------------------------------------------------" << std::endl;
     std::cout << "WriteBulkData" << std::endl;
-    benchOne.WriteBulkData(300, 10);
+    //benchOne.WriteBulkData(300, 10);
 
     std::cout << "------------------------------------------------" << std::endl;
     std::cout << "begin query 1" << std::endl;
@@ -93,11 +93,11 @@ try
 
     std::cout << "------------------------------------------------" << std::endl;
     std::cout << "WriteSingleData" << std::endl;
-    benchTwo.WriteSingleData(300, 10);
+    benchTwo.WriteSingleData(300, 5, 3600);
 
     std::cout << "------------------------------------------------" << std::endl;
     std::cout << "WriteBulkData" << std::endl;
-    benchTwo.WriteBulkData(300, 10);
+    //benchTwo.WriteBulkData(300, 10);
 
     std::cout << "begin query 2" << std::endl;
     if (CmdOptionExists(argv, argv+argc, "-q")) 

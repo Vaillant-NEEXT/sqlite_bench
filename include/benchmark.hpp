@@ -23,9 +23,9 @@ class BenchMark{
 
         virtual void CreateTable() = 0;
 
-        virtual void WriteSingleData(int dataPointNum, int timeStampNum)= 0;
+        virtual void WriteSingleData(int dataPointNum, int timeInterval, int timeRange)= 0;
 
-        virtual void WriteBulkData(int dataPointNum, int timeStampNum)= 0;
+        virtual void WriteBulkData(int dataPointNum, int timeInterval)= 0;
 
         virtual void QueryWithTime()= 0;
 
