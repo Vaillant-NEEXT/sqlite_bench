@@ -82,6 +82,12 @@ try
     std::cout << "------------------------------------------------" << std::endl;
     std::cout << "begin delete 1" << std::endl;
     benchOne.DeletDataOlderThan(time(nullptr) + 1000);
+    std::cout << "end delete 1" << std::endl;
+
+    std::cout << "------------------------------------------------" << std::endl;
+    std::cout << "begin vacuum 1" << std::endl;
+    benchOne.VacuumDb();
+    std::cout << "end vacuum 1" << std::endl;
 
     std::cout << "end bench 1" << std::endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(3000));
@@ -125,11 +131,17 @@ try
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         }
     }
-    std::cout << "end query 1" << std::endl;
+    std::cout << "end query 2" << std::endl;
 
     std::cout << "------------------------------------------------" << std::endl;
     std::cout << "begin delete 2" << std::endl;
     benchTwo.DeletDataOlderThan(time(nullptr) + 1000);
+    std::cout << "end delete 2" << std::endl;
+
+    std::cout << "------------------------------------------------" << std::endl;
+    std::cout << "begin vacuum 2" << std::endl;
+    benchTwo.VacuumDb();
+    std::cout << "end vacuum 2" << std::endl;
 
     std::cout << "end bench 2" << std::endl;
     std::cout << "------------------------------------------------" << std::endl;

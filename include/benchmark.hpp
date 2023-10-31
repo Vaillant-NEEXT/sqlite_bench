@@ -33,6 +33,12 @@ class BenchMark{
             handle.ExecuteSql(sql);
         }
 
+        void VacuumDb()
+        {
+            std::string sql = "VACUUM;";
+            handle.ExecuteSql(sql);
+        }
+        
         virtual void CreateTable() = 0;
 
         virtual void WriteSingleData(int dataPointNum, int timeRange)= 0;
